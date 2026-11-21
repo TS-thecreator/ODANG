@@ -1,0 +1,30 @@
+flowchart LR
+    Simulator["시뮬레이터"]
+    Terrain[("지형 고도 CSV")]
+    Table[("거리–포신각 CSV")]
+
+    subgraph Server["Python 서버 · 실행 흐름"]
+        direction LR
+        Detector["YOLOv8s<br/>전차 탐지"]
+        Planner["지형 기반<br/>경로 탐색"]
+        Mission["임무 상태 관리<br/>이동 / 사격 / 종료"]
+        Aiming["규칙 기반<br/>조준 처리"]
+        Detector -->|탐지 박스| Mission
+        Planner -->|경유지| Mission
+        Mission -->|사격 상태| Aiming
+    end
+
+    Simulator -->|카메라 이미지| Detector
+    Simulator -->|위치·각도·명중 결과| Mission
+    Terrain --> Planner
+    Table --> Aiming
+    Mission -->|이동 명령| Simulator
+    Aiming -->|조준·사격 명령| Simulator
+
+    classDef learned fill:#e8f0ff,stroke:#2563eb,color:#153677,stroke-width:2px;
+    classDef rule fill:#eaf6f1,stroke:#33866c,color:#174c3d,stroke-width:1.5px;
+    classDef input fill:#f8fafc,stroke:#94a3b8,color:#334155,stroke-width:1.5px;
+    class Detector learned;
+    class Planner,Mission,Aiming rule;
+    class Simulator,Terrain,Table input;
+    style Server fill:#ffffff,stroke:#cbd5e1,color:#334155,stroke-width:1px
